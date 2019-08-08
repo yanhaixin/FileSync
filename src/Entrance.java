@@ -1,7 +1,7 @@
 import com.sac.common.Log;
 import com.sac.db.DBMgr;
 import com.sac.file.FileCollection;
-import com.sac.file.Proprieties;
+import com.sac.file.GlobalProperties;
 import com.sac.file.Utility;
 import com.sac.fileSync.task.SyncTask;
 import com.sac.task.SimpleTM;
@@ -20,7 +20,7 @@ public class Entrance {
 
 	private static void startup() {
 		tm = new SimpleTM<SyncTask>(1, true);
-		long interval = Long.parseLong(Proprieties.getInstance().getValue("interval"));
+		long interval = Long.parseLong(GlobalProperties.getProperties().getProperty("interval"));
 		SyncTask t = new SyncTask(0, interval * 1000);
 		tm.add(t);
 		// 注册监听进程停止事件，当执行kill -15执行
