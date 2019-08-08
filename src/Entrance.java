@@ -1,44 +1,46 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.jcraft.jsch.ChannelSftp.LsEntry;
-import com.jcraft.jsch.SftpException;
-import com.sac.connection.FileSelector;
-import com.sac.connection.SFTP;
+import com.sac.common.Log;
+import com.sac.db.DBMgr;
+import com.sac.file.FileCollection;
+import com.sac.file.Proprieties;
+import com.sac.file.Utility;
+import com.sac.fileSync.task.SyncTask;
+import com.sac.task.SimpleTM;
+import com.sac.task.ThreadMgr;
 
 public class Entrance {
+	public static void testcode() {
+		FileCollection fc = Utility.readFileList("C:\\Users\\yanhaixin\\eclipse-workspace\\FileSync\\lib");
+		fc.forEach(x -> {
+			Log.logger.info(x.path);
+			Log.logger.info(x.name);
+		});
+	}
+
+	private static SimpleTM<SyncTask> tm = null;
+
+	private static void startup() {
+		tm = new SimpleTM<SyncTask>(1, true);
+		long interval = Long.parseLong(Proprieties.getInstance().getValue("interval"));
+		SyncTask t = new SyncTask(0, interval * 1000);
+		tm.add(t);
+		// 注册监听进程停止事件，当执行kill -15执行
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			Log.logger.warn(Thread.currentThread().getName() + ": shutdown");
+			Entrance.stop();
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+			}
+		}));
+	}
+
+	private static void stop() {
+		ThreadMgr.destory();
+		DBMgr.close();
+	}
 
 	public static void main(String[] args) {
-
-		SFTP sftp = new SFTP("172.18.7.105", "sac", "yanhaixin1980", 22);
-		sftp.connect();
-		try {
-			ArrayList<LsEntry> filelist = sftp.ls("/home/sac/project", new FileSelector());
-			for (LsEntry entry : filelist) {
-				System.out.println(entry.getFilename());
-				sftp.getAndSave("/home/sac/project/" + entry.getFilename(), "C:/test");
-			}
-
-		} catch (SftpException e) {
-			e.printStackTrace();
-		}
-		sftp.disConnect();
-
-		try (Stream<Path> walk = Files.walk(Paths.get("C:\\Users\\yanhaixin\\eclipse-workspace\\FileSync\\lib"))) {
-
-			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
-
-			result.forEach(System.out::println);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		startup();
 	}
 
 }

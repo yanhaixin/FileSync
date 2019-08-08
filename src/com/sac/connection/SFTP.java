@@ -2,6 +2,7 @@ package com.sac.connection;
 
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.function.Predicate;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -59,16 +60,16 @@ public class SFTP {
 	}
 
 	public ArrayList<LsEntry> ls(String path) throws SftpException {
-		return ls(path, new DefaultSelector());
+		return ls(path, LSSelector::defaultSelector);
 	}
 
-	public ArrayList<LsEntry> ls(String path, LSSelector selector) throws SftpException {
+	public ArrayList<LsEntry> ls(String path, Predicate<LsEntry> predicate) throws SftpException {
 		ArrayList<LsEntry> rvalue = new ArrayList<LsEntry>();
 		if (channelSftp != null) {
 			Vector<?> filelist = channelSftp.ls(path);
 			for (Object entry : filelist) {
 				LsEntry lsEntry = (LsEntry) entry;
-				if (selector.select(lsEntry))
+				if (predicate.test(lsEntry))
 					rvalue.add(lsEntry);
 			}
 		}

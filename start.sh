@@ -1,0 +1,1 @@
+nohup java -jar fileSync.jar >/dev/null 2>&1 &

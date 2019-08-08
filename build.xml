@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar"
+	name="Create Runnable Jar for Project microgrid with libraries in sub-folder">
+	<!--this file was created by Eclipse Runnable JAR Export Wizard -->
+	<!--ANT 1.7 is required -->
+	<!--define folder properties -->
+	<property name="dir.buildfile" value="." />
+	<property name="dir.jarfile"
+		value="C:/Users/yanhaixin/Desktop/fileSync" />
+	<target name="create_run_jar">
+		<jar destfile="${dir.jarfile}/fileSync.jar">
+			<manifest>
+				<attribute name="Main-Class"
+					value="Entrance" />
+				<attribute name="Class-Path"
+					value=". lib/jsch-0.1.55.jar lib/Common.jar lib/mchange-commons-java-0.2.11.jar lib/c3p0-0.9.5.2.jar lib/log4j-api-2.11.1.jar lib/log4j-core-2.11.1.jar lib/dom4j-2.1.1.jar lib/jaxen-1.1.4.jar" />
+			</manifest>
+			<fileset dir="${dir.buildfile}/bin">
+				<exclude name="*.xml" />
+			</fileset>
+		</jar>
+		<delete dir="${dir.jarfile}/lib" />
+		<mkdir dir="${dir.jarfile}/lib" />
+		<copy
+			file="${dir.buildfile}/lib/Common.jar"
+			todir="${dir.jarfile}/lib" />
+		<copy
+			file="${dir.buildfile}/lib/jsch-0.1.55.jar"
+			todir="${dir.jarfile}/lib" />
+		<copy
+			file="${dir.buildfile}/lib/c3p0-0.9.5.2/lib/mchange-commons-java-0.2.11.jar"
+			todir="${dir.jarfile}/lib" />
+		<copy
+			file="${dir.buildfile}/lib/c3p0-0.9.5.2/lib/c3p0-0.9.5.2.jar"
+			todir="${dir.jarfile}/lib" />
+		<copy
+			file="${dir.buildfile}/lib/apache-log4j-2.11.1-bin/log4j-api-2.11.1.jar"
+			todir="${dir.jarfile}/lib" />
+		<copy
+			file="${dir.buildfile}/lib/apache-log4j-2.11.1-bin/log4j-core-2.11.1.jar"
+			todir="${dir.jarfile}/lib" />
+		<copy file="${dir.buildfile}/lib/dom4j/dom4j-2.1.1.jar"
+			todir="${dir.jarfile}/lib" />
+		<copy file="${dir.buildfile}/lib/dom4j/jaxen-1.1.4.jar"
+			todir="${dir.jarfile}/lib" />
+		<delete file="${dir.jarfile}/c3p0-config.xml" />
+		<delete file="${dir.jarfile}/log4j2.xml" />
+		<delete file="${dir.jarfile}/properties.xml" />
+		<delete file="${dir.jarfile}/start.bat" />
+		<delete file="${dir.jarfile}/start.sh" />
+		<delete file="${dir.jarfile}/stop.sh" />
+		<copy file="${dir.buildfile}/c3p0-config.xml"
+			todir="${dir.jarfile}" />
+		<copy file="${dir.buildfile}/log4j2.xml" todir="${dir.jarfile}" />
+		<copy file="${dir.buildfile}/properties.xml"
+			todir="${dir.jarfile}" />
+		<copy file="${dir.buildfile}/start.bat"
+					todir="${dir.jarfile}" />
+		<copy file="${dir.buildfile}/start.sh"
+					todir="${dir.jarfile}" />
+		<copy file="${dir.buildfile}/stop.sh"
+					todir="${dir.jarfile}" />
+	</target>
+</project>
