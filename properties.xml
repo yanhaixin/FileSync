@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <property name="user">sac</property>
-    <property name="passwd">yanhaixin1980</property>
+    <property name="user">cps</property>
+    <property name="passwd">SAC888</property>
     <property name="host">172.18.7.105</property>
     <property name="port">22</property>
-	<property name="remotePath">/home/sac/project/</property>
-	<property name="localPath">C:/test</property>
+	<property name="remotePath">/home/cps/CPS_Project/ubuntu/data/historysave</property>
+	<property name="localPath">/home/cps/CPS_Project/ubuntu/data/historysave</property>
 	<property name="interval">3600</property>
 </root>

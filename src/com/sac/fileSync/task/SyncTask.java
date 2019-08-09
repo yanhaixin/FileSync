@@ -10,6 +10,7 @@ import com.jcraft.jsch.SftpException;
 import com.sac.common.Log;
 import com.sac.connection.LSSelector;
 import com.sac.connection.SFTP;
+import com.sac.connection.SftpChannel;
 import com.sac.file.DataFile;
 import com.sac.file.FileCollection;
 import com.sac.file.GlobalProperties;
@@ -42,15 +43,17 @@ public class SyncTask extends ScheduledTask {
 
 	@Override
 	protected void exec() throws Exception {
-		try {
+		try (SftpChannel channel = sftp.getSftpChannel()) {
 			FileCollection remote = new FileCollection();
-			getRemoteFileRecusive(sftp, remotePath, remote, false);
+			getRemoteFileRecusive(channel, remotePath, remote, false);
 			FileCollection local = Utility.readFileList(localPath);
 			ArrayList<DataFile> filelist = Utility.compareAndGet(remote, local);
+			if (!filelist.isEmpty())
+				Log.logger.info("Start file download");
 			filelist.forEach(x -> {
-				Log.logger.info(x.name);
+				Log.logger.info(x.getFullPath() + ' ' + Utility.getSizeString(x.size));
 				try {
-					sftp.getAndSave(x.getFullPath(), localPath);
+					channel.getAndSave(x.getFullPath(), localPath);
 				} catch (SftpException | JSchException e) {
 					Log.logger.error(e.getMessage());
 				}
@@ -58,18 +61,18 @@ public class SyncTask extends ScheduledTask {
 		} catch (SftpException e) {
 			Log.logger.error(e.getMessage());
 		}
-		sftp.disconnectChannel();
 	}
 
-	protected void getRemoteFileRecusive(SFTP sftp, String path, FileCollection rval, boolean ifAdd)
+	protected void getRemoteFileRecusive(SftpChannel channel, String path, FileCollection rval, boolean ifAdd)
 			throws SftpException, JSchException {
 		if (ifAdd) {
-			ArrayList<LsEntry> filelist = sftp.ls(path, LSSelector::fileSelector);
-			filelist.forEach(x -> rval.put(new DataFile(path, x.getFilename())));
+			ArrayList<LsEntry> filelist = channel.ls(path, LSSelector::fileSelector);
+			filelist.forEach(x -> rval
+					.put(new DataFile(path, x.getFilename(), x.getAttrs().getSize(), x.getAttrs().getATime())));
 		}
-		ArrayList<LsEntry> dirlist = sftp.ls(path, LSSelector::dirSelector);
+		ArrayList<LsEntry> dirlist = channel.ls(path, LSSelector::dirSelector);
 		for (LsEntry lsEntry : dirlist) {
-			getRemoteFileRecusive(sftp, path + '/' + lsEntry.getFilename(), rval, true);
+			getRemoteFileRecusive(channel, path + '/' + lsEntry.getFilename(), rval, true);
 		}
 	}
 }
